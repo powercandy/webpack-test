@@ -13,8 +13,9 @@ const config = {
 	mode: 'production',
 	entry: utils.entriesPath,
 	output: {
-		filename: '[name].bundle.[hash:5].js',
-		path: path.resolve(__dirname, '../dist')
+		filename: '[name]/[name].[hash:5].js',
+		path: path.resolve(__dirname, '../dist'),
+		publicPath: './'
 	},
 	module: {
 		rules: [
@@ -39,7 +40,7 @@ const config = {
 }
 Object.keys(utils.templatesPath).forEach(v => {
 	let options = {
-		filename: `html/${v}.html`,
+		filename: `${v}/${v}.html`,
 		template: utils.templatesPath[v]
 	}
 	console.log(options)
