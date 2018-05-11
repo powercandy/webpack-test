@@ -7,6 +7,8 @@ const shell = require('shelljs')
 
 const htmlWebpackPlugin = require('html-webpack-plugin')
 
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+
 shell.rm('-rf', path.join(__dirname, '../dist'))
 
 const config = {
@@ -15,7 +17,7 @@ const config = {
 	output: {
 		filename: '[name]/[name].[hash:5].js',
 		path: path.resolve(__dirname, '../dist'),
-		publicPath: './'
+		publicPath: '../'
 	},
 	module: {
 		rules: [
@@ -24,8 +26,15 @@ const config = {
 				loader: 'babel-loader'
 			},
 			{	
-				test: /\.css$/,
-				loader: 'css-loader'
+				test: /\.scss$/,
+				loader: ExtractTextPlugin.extract({
+					fallback: 'style-loader',
+					use: [
+						'css-loader',
+						'sass-loader'
+					],
+					publicPath: ''
+				})
 			},
 			{
 				test: /\.html$/,
@@ -34,16 +43,27 @@ const config = {
 		]
 	},
 	resolve: {
-		extensions: ['.js', '.css', '.html']
+		extensions: ['.html', '.css', '.js']
 	},
-	plugins: []
+	plugins: [
+		new ExtractTextPlugin({
+			filename: '[name]/[name].[contenthash].css',
+			publicPath: '../',
+			allChunks: true
+		})
+	]
 }
 Object.keys(utils.templatesPath).forEach(v => {
 	let options = {
 		filename: `${v}/${v}.html`,
-		template: utils.templatesPath[v]
+		template: utils.templatesPath[v],
+		chunks: []
+	}
+	if (utils.entriesPath.hasOwnProperty(v)) {
+		options.chunks  = ['common', v]
 	}
 	console.log(options)
 	config.plugins.push(new htmlWebpackPlugin(options))
 })
+
 module.exports = config
